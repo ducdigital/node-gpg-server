@@ -1,0 +1,21 @@
+{
+  "name": "gpg-server",
+  "version": "0.0.1",
+  "description": "GPG Server for verify signature and ecrypt using APIs",
+  "main": "index.js",
+  "dependencies": {
+    "async": "^1.5.2",
+    "gpg": "^0.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gpg",
+    "api",
+    "server"
+  ],
+  "author": "VNFreenet",
+  "license": "ISC"
+}

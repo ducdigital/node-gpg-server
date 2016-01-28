@@ -1,0 +1,7 @@
+{
+  "apps": [{
+  	"name": "GPG-Node Server",
+  	"script": "./index.js",
+  	"instances": "1"
+  }]
+}
