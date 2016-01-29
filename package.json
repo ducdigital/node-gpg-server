@@ -5,7 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "async": "^1.5.2",
-    "gpg": "^0.4.0"
+    "gpg": "^0.4.0",
+    "pg": "^4.4.4",
   },
   "devDependencies": {},
   "scripts": {
@@ -15,7 +16,5 @@
     "gpg",
     "api",
     "server"
-  ],
-  "author": "VNFreenet",
-  "license": "ISC"
+  ]
 }
