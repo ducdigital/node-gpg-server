@@ -1,42 +1,46 @@
 'use strict';
-var gpg = require('gpg');
-var async = require('async');
-var crypto = require('crypto');
+var GPGLib = require('./GPGLib');
 var fs = require("fs");
 var http = require('http');
 
-var tempKeyPath = __dirname + '/tmp/';
 var publicKey1 = `
 -----BEGIN PGP PUBLIC KEY BLOCK-----
-Comment: GPGTools - https://gpgtools.org
 
-mQENBFVsjloBCACfhbQ7HwMqTeMNsGJTf6GYNG/21WqZT2+TfWbtf9f69BTlV53W
-8DKFEEMHWw+Tq8yURN5hWR+s/BH3wRlfvLyWmThm7Z6c6Py/bcDAmnRirPtXLOU6
-dE0Pmr5N9uMHZpZoOrtSpZUbsY9qi0q3yZHZKJPe/+tMScDUKRApjvLGrf2HtyZK
-6ojngWhBpLrlAFzGvftyqjp54S4EXyg04zvuHs6t57MwfoFA0k48vINm5ESingo+
-uHpq+ApUhfsvyVRLIGrMITsLL6yp4EFzDjO50mivnJ9nWkKQclCx/9XfdorzbyvG
-MNZdBjMwizdWFzV+XaEEnm1avIWQavMMje9FABEBAAG0Rk5vZGUtR1BHIFRlc3Qg
-S2V5IChLZXlwYWlyIHVzZWQgZm9yIG5vZGUtZ3BnIHRlc3RpbmcuKSA8dGVzdEB0
-ZXN0LmNvbT6JATcEEwEKACEFAlVsjloCGwMFCwkIBwMFFQoJCAsFFgIDAQACHgEC
-F4AACgkQgzdEOG8g9Z1YvQf7BtJkD9AntsVrIN16lTJCWOoTXUC4iDaWfpe4UF11
-W+OfWdDrAUC7JFDwTiWMn86oaXMeX2NnP5ve2VYQA3aCw7uW8u3tySeC7cCfwkAM
-eBlLbZiv+lYUzN99oRhTx6EmYBa/g8Y8VVgj/kJb8yRfBsVHI5wqlvJOdqATiGUh
-dmsuaPvS3blPB0S2obE/2ix1hM9rMERyns8zII7QS5+dkZmcblVK/ltCw6ikHZtY
-vSQjw3hMFvIgiChHLKK0BQ5iEuECSA6fsLbMrQQCjsFgV9QmsHKuV6AFd0XDUr+Q
-XCeNVAqPmu8NbRiFKOjE41Vqy2bEDRHGhD98eHjvQzNAEbkBDQRVbI5aAQgArIuo
-jfSFLw7h2dJhdfwXVSW2CpJo7ubkif222W64N93m0ZeOKb1nv9lT+qr7Hcpbf8uk
-wFkONtldHiW+H9W0fC+wctIWYTQhrwVrpUAIjuxATAXqLS/45mEU63tZL6Gkl2IJ
-ItQM9BdZLLnkv+hCYLic20CDbv0EoWO70efMLkAJXhmlkLbivE2jdqKqish/1z5R
-lRJFJOWob8jdzFbHh3F69zvxEjsYPw/vr27W4+ZtLwprJVbMs3wdS+d5DD1IryZx
-F2kHRPmj35eBaz6evDm2NRzVfTbssOQhVWs0eU6QJwQDKj+VGXvGvr+ZvW60eTge
-jD63wIHDKfYRH9OqiwARAQABiQEfBBgBCgAJBQJVbI5aAhsMAAoJEIM3RDhvIPWd
-m1MH/jK3nvmyuhDZ9rZwizxYFh0BNTgZKRMn2FHMrQYTDo2rwLbKEBC9/6BXQH3A
-kz+sNTiDYlY2osUvRfmOVku3QdaN2oloGbbYuym0ZnwI/dhqwZhYL7gLasW8ZAgu
-uFOKCo5auY1MjvMjC2Mn14r/f4fYYFoqEYQmKSvLmFktcPou8E4w/qkd+8tKK4xv
-fCbJGjoZdRQI2Rflz8mfC3B9NXvePW/wgYXNDck9JG6ARqWrozxy+VXcHSN4HyDZ
-jn9fF4Fx706Lp/saiasNl97czOR0WXAsjTBSFPZp3HCRJ/b2TW/SVsLFk4Pto/xJ
-IwSJ9sM2NALLnqPcAHMJaACPw6s=
-=rxX0
+mQENBFamYggBCAC4hOItfTjKFSCHIauEOJipDKw9OSq3e5/UVtfTTgdu6hpd/2aZ
+pR/9RMoCscSgwzjvwzmRX6c7r4WBkzQqghyMAizWgmKwgb0AQiWCR0z4lHteHfho
+ZocKMI8Netvm0X5drL5F8qJpFxyjiA7reed4Vs5NM2I23IqXD1YNdWIzCDNH3/7T
+0KiDTh3II/JHYj5RL7WiyPucQmlE7beqc8U5WB7ptRfbQVZhy6AkRBr0fWy9si7l
+tZja0NYJgKG7L21cynxIj3bpGvpTKa83od5Z2Vlbfq3IuDn8TnADSEexIC07/0MU
+8Iot/KlnAoVB/Lb+9TpnJ8vP1lyXZ5Db1mq/ABEBAAG0QVZORnJlZW5ldCAoaHR0
+cDovL3ZuZnJlZW5ldHRleDdnZngub25pb24pIDx2bmZyZWVuZXRAc2lnYWludC5v
+cmc+iQE3BBMBCgAhBQJWpmIIAhsvBQsJCAcDBRUKCQgLBRYCAwEAAh4BAheAAAoJ
+EM7fhqyKYINrtTUIAKuOuFaPDK6snqxgWAm8WMgyUREklKlTcbwhEYX9Q03Pyp+x
+7/uG/P9U31T6A1/u2B+0gUSGQp7E5EYi6SEqIOMvjvUtEOPJ9YLgNvtQWuIOK8PO
+EQ4ByLFyrJridThj7z+JhvUrfpCzNmMKuYJgRAtcKmn1o2rOrGevnCur5uNDlAUI
+oEwy2ND21yeSeL1/riU7kgtt+/Jqc9LHo9SiKjQNzTyTk8LOxXo0k88WA6mnUClh
++1euU1lpP590l0P5Fp0YLl8KIvClb5CV4xybCox2j5zyXYqeWtF/t7J8m15fHJS4
+qPQZ/Zm+w3tf1ROWqeRhbmIyxbNj7myrNaY8PAW5AQ0EVqZiCAEIAKPOhBQlzJle
+mLrDdfKp9VGSiC7wUXZhWlrLwI4qqsPhF1LTBICZBLhcy2x4bF2PdhXYWuSGWSci
+GCWM0/5K6wLPO/Gj54SglhTn/qj2p63mNC99W8lEr+ttHZ8Kg+ETEBK7oSwJN6LN
+1QPhJ83w5hbY6JyawwyBYL2ECFDekSIAad6vqnGC5lT0/6lodSBv7wRglXCxfBCe
+HyHffbHvWgjs7ZEBznMkbrMvQjX3TgvK8jgLImIPs8R1ZBv601iQFbMBAWlvRAbO
+XRpgDUJJSW1HT+qXkb7vAcnaRAuevsO3FtInlHJ7nI1yTSQlSR5A2GnqbHSP7Omd
+rj05jbJSt4cAEQEAAYkCngQYAQoACQUCVqZiCAIbLgGJCRDO34asimCDa8C9IAQZ
+AQoAZgUCVqZiCF8UgAAAAAAuAChpc3N1ZXItZnByQG5vdGF0aW9ucy5vcGVucGdw
+LmZpZnRoaG9yc2VtYW4ubmV0MTY5QjRFQzU3RTAwMDRGMUZGQkEzRjhDQzFGNzdC
+MUEyRjRBNkUzOQAKCRDB93saL0puOSP3CACZ6dCgEi6iBbie7jYkrVMczFMvVFbc
+P0QqNq++aHXfZdAZTkIKGXCJfVQtPZyXOGxIbtH5W7Vp9H1qd+CqujqyIMWvvalj
+2QhemqhEH41J8hpxnSVc80KYF2i/Wq+j6jgkAPRveebBMNUAaxUo8Kcmz7o0RNWJ
+V/8vlHgJmQq1l7WXSPt5W7zGoB/SD+2X9dSFjVxXFbjfANGFl97LBQSydxwNpuTW
+L15m8b2kzC+wPmfmHPWv1ReHiqK+GQhskGBflo7kRBZ6S/OKOAqkIpw15ct4EDQp
+euG7jbOa0wKbZjC4cq3sBA8Tcvki57pOHEFOfTHX59atZuugbhC2jPbdkqAH/i0Q
+e3ZBlMDJKEDrr1JStllIfp4OGpM8KWeeVl4wrIjOyeZu4EYEV7JjyQAZi9M5o135
+Ynjr9Q95APiPjdE7tDKDLZ4z8qC8YXlSu2Y4WbFIQpDLwVzXtcOKCdpjvvd3eGFi
+R9Hpll1eaPoV/+ulGzFubnA5QhdK7x7mVFgfEO9zIvUiI2rSHjaTFBOlmbnqzvlO
+Zek7ulwi9+4E1Pm2deMX3qsViwipVUUdOPNY8ESXTpJqyMwS3oSEM7tyhEZigPcC
+DkK+78WuMyawdPdb61cG9uc61IsfK7ZhUMbxYKuzkPL7qFdqhJDnK0cc1cCutEEj
+4GcfXGZ30g5/trk9NIw=
+=kXtJ
 -----END PGP PUBLIC KEY BLOCK-----
 `;
 
@@ -59,76 +63,17 @@ pBCh7uhYBVfY99Zu/9KsJ9lTlcB1AUhz8JkIZb+pTmqoZbhb3RR0V+b3lStravU=
 -----END PGP SIGNATURE-----
 `;
 
-
-
-
-
-
-
-
-
-
-var createRandomHash = function () {
-  var current_date = (new Date()).valueOf().toString();
-  var random = Math.random().toString();
-  return crypto.createHash('sha1').update(current_date + random).digest('hex');
-}
-
-var createPubKeyHash = function (pubkey) {
-  return crypto.createHash('sha1').update(pubkey).digest('hex');
-}
-
-var GPGVerify = function (publicKey, signedMessage, cb) {
-  async.waterfall ([
-    function hash (next) {
-        let hash = createPubKeyHash(publicKey);
-        let tmpKeyRing = tempKeyPath + hash + '.gpg';
-        return next(null, tmpKeyRing);
-    },
-    // function createTempFile (tmpKeyRing, next) {
-    //   fs.open(tmpKeyRing, "wx", function (err, fd) {
-    //     if (!!err) {
-    //       return next(err, tmpKeyRing);
-    //     }
-    //     fs.close(fd, function (err) {
-    //       if (!!err) {
-    //         return next(err, tmpKeyRing);
-    //       }
-    //       next(null, tmpKeyRing);
-    //     });
-    //   });
-    // },
-    function importKey (tmpKeyRing, next) {
-      gpg.importKey (publicKey, ['--no-default-keyring', '--keyring', tmpKeyRing], function (err, importResult) {
-        if (err) {
-          return next(err, tmpKeyRing);
-        }
-
-        return next(null, tmpKeyRing);
-      });
-    },
-    function verifySignature (tmpKeyRing, next) {
-      gpg.verifySignature(signedMessage, ['--no-default-keyring', '--keyring', tmpKeyRing], function (err, result) {
-        if (err) {
-          return next(err, tmpKeyRing);
-        }
-
-        return next(null, tmpKeyRing, result);
-      });
-    }
-  ], function done(err, tmpKeyRing, result) {
-      return cb(err, result);
-  });
-};
+var gpgLib = new GPGLib({
+  tempKeyPath: __dirname + '/tmp/'
+});
 
 http.createServer(function (req, res) {
-  return GPGVerify(publicKey1, signedMessage1, function (err, result) {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
+  return gpgLib.verify(publicKey1, signedMessage1, function (err, result) {
+    res.writeHead(200, {'Content-Type': 'application/json'});
     if (!!err) {
-      console.log(err);
-      res.write(err.toString());
+      res.write(JSON.stringify(gpgLib.parse(err)));
     } else {
-      res.write(result);
+      res.write(JSON.stringify(gpgLib.parse(result)));
     }
 
     res.end();
