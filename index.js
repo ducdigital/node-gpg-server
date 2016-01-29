@@ -66,16 +66,27 @@ pBCh7uhYBVfY99Zu/9KsJ9lTlcB1AUhz8JkIZb+pTmqoZbhb3RR0V+b3lStravU=
 var gpgLib = new GPGLib({
   tempKeyPath: __dirname + '/tmp/'
 });
+var pg = require('pg');
+var conString = "postgres://vnfreenet:x8**213hxa1@#%61@10.125.125.12/vnfreenet";
 
-http.createServer(function (req, res) {
+async.parallel([
+  function DBConnection (next) {
+    pg.connect(conString, function(err, client, done) {
+      return next(err, {client: client, done: done});
+    });
+  },
+  function Server (next) {
+    http.createServer(next).listen(8010);;
+  }
+], function done (err, result){
   return gpgLib.verify(publicKey1, signedMessage1, function (err, result) {
-    res.writeHead(200, {'Content-Type': 'application/json'});
+    result.Server.res.writeHead(200, {'Content-Type': 'application/json'});
     if (!!err) {
-      res.write(JSON.stringify(gpgLib.parse(err)));
+      result.Server.res.write(JSON.stringify(gpgLib.parse(err)));
     } else {
-      res.write(JSON.stringify(gpgLib.parse(result)));
+      result.Server.res.write(JSON.stringify(gpgLib.parse(result)));
     }
 
-    res.end();
+    result.Server.res.end();
   });
-}).listen(8010);
+});
