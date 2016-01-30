@@ -5,8 +5,10 @@
   "main": "index.js",
   "dependencies": {
     "async": "^1.5.2",
+    "express": "^4.13.4",
     "gpg": "^0.4.0",
-    "pg": "^4.4.4",
+    "lodash": "^4.1.0",
+    "pg": "^4.4.4"
   },
   "devDependencies": {},
   "scripts": {
